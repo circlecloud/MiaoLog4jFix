@@ -1,3 +1,3 @@
-# MiaoNashorn
+# MiaoLog4j2Fix
 
-> 用于 Java14+ 环境下 自动加载Nashorn引擎
+> 用于 Spigot等 Minecraft服务器 修复 Log4j2 存在的 RCE 漏洞
