@@ -1,25 +1,21 @@
 package pw.yumc.MiaoLog4j2Fix;
 
-import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.config.AbstractConfiguration;
 import org.apache.logging.log4j.core.config.AppenderControl;
 import org.apache.logging.log4j.core.config.AppenderControlArraySet;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.lookup.AbstractLookup;
 import org.apache.logging.log4j.core.lookup.StrLookup;
 import org.apache.logging.log4j.core.pattern.LiteralPatternConverter;
 import org.apache.logging.log4j.core.pattern.LogEventPatternConverter;
 import org.apache.logging.log4j.core.pattern.PatternFormatter;
-import org.bukkit.Bukkit;
 import pw.yumc.MiaoLog4j2Fix.reflect.Reflect;
-
-import org.apache.logging.log4j.core.Logger;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
@@ -30,16 +26,20 @@ import java.util.Map;
  * @since 2016年8月29日 上午7:50:39
  */
 public class MiaoLog4j2Fix {
-    static {
+    @SneakyThrows
+    public MiaoLog4j2Fix(Object console) {
+        Logger logger;
         try {
-            Object console = Reflect.on(Bukkit.getServer()).field("console").get();
-            Logger logger = null;
-            try {
-                logger = Reflect.on(console).field("LOGGER").get();
-            } catch (final Throwable e) {
-                Field loggerField = console.getClass().getDeclaredFields()[0];
-                logger = (Logger) loggerField.get(console);
-            }
+            logger = Reflect.on(console).field("LOGGER").get();
+        } catch (final Throwable e) {
+            Field loggerField = console.getClass().getDeclaredFields()[0];
+            logger = (Logger) loggerField.get(console);
+        }
+        fix(logger);
+    }
+
+    public void fix(Logger logger) {
+        try {
             logger = logger.getParent();
             log("根日志: %s", logger);
             removeJndi(logger);
@@ -52,7 +52,7 @@ public class MiaoLog4j2Fix {
         }
     }
 
-    public static void removeJndi(Logger logger) {
+    public void removeJndi(Logger logger) {
         AppenderControlArraySet set = Reflect.on(logger).field("privateConfig").field("loggerConfig").field("appenders").get();
         AppenderControl[] appenderControls = set.get();
         for (AppenderControl appenderControl : appenderControls) {
@@ -76,7 +76,7 @@ public class MiaoLog4j2Fix {
         }
     }
 
-    public static void removeFormatterLookups(PatternFormatter[] formatters) {
+    public void removeFormatterLookups(PatternFormatter[] formatters) {
         for (PatternFormatter formatter : formatters) {
             LogEventPatternConverter converter = formatter.getConverter();
             if (converter instanceof LiteralPatternConverter) {
@@ -88,7 +88,7 @@ public class MiaoLog4j2Fix {
         }
     }
 
-    public static void log(String format, Object... args) {
+    public void log(String format, Object... args) {
         System.out.println("[MiaoLog4j2Fix] " + String.format(format, args));
     }
 

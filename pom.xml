@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pw.yumc</groupId>
     <artifactId>MiaoLog4j2Fix</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <developers>
         <developer>
             <id>502647092</id>
